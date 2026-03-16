@@ -6,7 +6,6 @@ from django.contrib.auth.models import (
     BaseUserManager,
 )
 from django.utils import timezone
-from phonenumber_field.modelfields import PhoneNumberField
 
 
 class UserManager(BaseUserManager):
@@ -46,11 +45,18 @@ class User(AbstractBaseUser, PermissionsMixin):
         db_index=True
     )
 
+    # personalization
     preferred_name = models.CharField(
         max_length=120,
         blank=True,
         null=True,
         help_text="Name used for personalization"
+    )
+
+    date_of_birth = models.DateField(
+        blank=True,
+        null=True,
+        help_text="Date of birth"
     )
 
     # roles (future: therapist accounts)
