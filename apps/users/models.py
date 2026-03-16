@@ -47,7 +47,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     # personalization
     preferred_name = models.CharField(
-        max_length=120,
+        max_length=50,
         blank=True,
         null=True,
         help_text="Name used for personalization"

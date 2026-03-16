@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .serializers import RegisterSerializer, LoginSerializer
+from .serializers import RegisterSerializer, OnboardingSerializer, LoginSerializer
 
 
 @api_view(["POST"])
@@ -36,25 +36,12 @@ def register_user(request):
         status=status.HTTP_201_CREATED,
     )
 
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def submit_onboarding(request):
 
     user = request.user
-    preferred_name = request.data.get("preferred_name")
-    date_of_birth = request.data.get("date_of_birth")
-
-    if not preferred_name:
-        return Response(
-            {"error": "Preferred name is required."},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
-    
-    if not date_of_birth:
-        return Response(
-            {"error": "Date of birth is requires."},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
 
     if user.is_onboarding_completed:
         return Response(
@@ -62,10 +49,19 @@ def submit_onboarding(request):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-    user.preferred_name = preferred_name
-    user.date_of_birth = date_of_birth
+    serializer = OnboardingSerializer(data=request.data)
+
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    user.preferred_name = serializer.validated_data["preferred_name"]
+    user.date_of_birth = serializer.validated_data["date_of_birth"]
     user.is_onboarding_completed = True
-    user.save()
+    user.save(update_fields=[
+        "preferred_name",
+        "date_of_birth",
+        "is_onboarding_completed",
+    ])
 
     return Response(
         {
