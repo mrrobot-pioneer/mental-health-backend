@@ -4,14 +4,14 @@ from .models import Chat, Message
 # Register your models here.
 @admin.register(Chat)
 class ConversationAdmin(admin.ModelAdmin):
-    list_display = ['title', 'user', 'updated_at']
+    list_display = ['title', 'user', 'created_at']
     list_filter = ['created_at', 'updated_at']
     search_fields = ['title']
     readonly_fields = ['created_at', 'updated_at']
 
     fieldsets = (
         ('Basic Info', {
-            'fields': ('user', 'title')
+            'fields': ('user', 'title', 'emoji')
         }),
         ('Timestamps', {
             'fields': ('created_at', 'updated_at'),

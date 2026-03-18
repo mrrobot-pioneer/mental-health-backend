@@ -1,4 +1,5 @@
 import uuid
+from django.utils import timezone
 from django.db import models
 from django.contrib.auth import get_user_model
 
@@ -20,16 +21,19 @@ class Chat(models.Model):
 
     # Chat Title
     title = models.CharField(
-        max_length=255, 
+        max_length=100, 
         blank=True, 
-        default="New Chat Created"
+        default=""
     )
 
     emoji = models.CharField(max_length=10, blank=True, default="💬")
 
+    # pinned
+    is_pinned = models.BooleanField(default=False)
+
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    updated_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ['-updated_at']
@@ -77,3 +81,12 @@ class Message(models.Model):
 
     def __str__(self):
         return f"{self.role.title()}: {self.content[:100] + '...' if len(self.content) > 100 else self.content}"
+
+
+    def save(self, *args, **kwargs):
+        is_new = self._state.adding
+        super().save(*args, **kwargs)
+
+        if is_new:
+            Chat.objects.filter(pk=self.chat_id).update(
+                updated_at=timezone.now())
