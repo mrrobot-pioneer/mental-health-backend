@@ -145,3 +145,31 @@ def get_me(request):
         },
         status=status.HTTP_200_OK,
     )
+
+
+@api_view(["PATCH"])
+@permission_classes([IsAuthenticated])
+def update_me(request):
+    user = request.user
+
+    preferred_name = request.data.get("preferred_name")
+    email = request.data.get("email")
+
+    if preferred_name is not None:
+        user.preferred_name = preferred_name
+
+    if email is not None:
+        user.email = email
+
+    user.save()
+
+    return Response(
+        {
+            "id": str(user.id),
+            "email": user.email,
+            "preferred_name": user.preferred_name,
+            "role": user.role,
+            "is_onboarding_completed": user.is_onboarding_completed,
+        },
+        status=status.HTTP_200_OK,
+    )
